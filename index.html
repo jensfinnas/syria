@@ -78,7 +78,7 @@ h2 {
 <div id="share" class="block">
 <div class="fb-like" data-href="http://jplusplus.se/u/syria" data-width="300" data-colorscheme="dark" data-layout="button_count" data-action="recommend" data-show-faces="true" data-send="false"></div>
 	
-	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://http://jplusplus.se/u/syria" data-via="jensfinnas">Tweet</a>
+	<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://jplusplus.se/u/syria" data-via="jensfinnas">Tweet</a>
 </div>
 
 <div id="credit">
@@ -98,36 +98,44 @@ function addCommas(nStr) {
     }
     return x1 + x2;
 }
-function scrollTo(h, time){
-    var aTag = $("#"+h);
-    $('html,body').animate({scrollTop: aTag.offset().top},time);
-}
 function getParameterByName(name) {
     name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
     var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
         results = regex.exec(location.search);
     return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
+
+// Scroll to headline with given id
+function scrollTo(h, time){
+    var aTag = $("#"+h);
+    $('html,body').animate({scrollTop: aTag.offset().top},time);
+}
+
+// Get data
 function getData() {
 	var country = getParameterByName("country");
-	if (!country) country = "fi";
+	if (!country) country = "fi"; // If no country parameter given display Finland
 	
 	for (var i=0; i<countries.length; i++) {
-		if (countries[i]['Country id'] == country) return countries[i];
+		if (countries[i]['Country id'] == country) return countries[i]; // Return id match
 	}
 }
 function drawIcons(n) {
+	// Count number of image blocks
 	var n2000 = Math.floor(n / 2000);
 	var n200 = Math.floor((n - n2000 * 2000) / 200);
 	var n1 = Math.floor(n - n2000 * 2000 - n200 * 200);
 
+	// Draw 2000 item blocks
 	for (var j=0; j<n2000; j++) {
 		if (j%25==0 && j!==0) cont.append('<div class="break">'+addCommas(j*2000)+'</div>')				
 		cont.append('<img src="2000.png" class="row2000"/><br>');
 	}
+	// Draw 200 item blocks
 	for (var j=0; j<n200; j++) {
 		cont.append('<img src="200.png" class="row200"/><br>');				
 	}
+	´// Draw single items
 	for (var j=0; j<n1; j++) {
 		cont.append('<img src="1.png" class="row1"/>');				
 	}
@@ -135,6 +143,7 @@ function drawIcons(n) {
 	
 }
 var cont = $("#container");
+// Data, copy-paste from Google Spreadsheet via Mr Data Converter
 var countries = [
 {"Country id":"fi","Country":"Finland","Number":72,"Sentence":"Finland has so far received * Syrian asylum seekers this year.","Source name":"Yle","Source url":"http://yle.fi/uutiset/interior_minister_finland_could_take_in_500_syrian_refugees/6838793"},
 {"Country id":"ch","Country":"Switzerland","Number":500,"Sentence":"Switzerland is planning to take up to * Syrian refugees within the next 3 years.","Source name":"Tages-Anzeiger","Source url":"http://www.tagesanzeiger.ch/schweiz/standard/Sommaruga-holt-500-syrische-Fluechtlinge-in-die-Schweiz/story/15112816"},
@@ -142,34 +151,41 @@ var countries = [
 {"Country id":"ca","Country":"Canada","Number":1300,"Sentence":"Canada plans to accept up to * Syrian refugees.","Source name":"CBC","Source url":"http://www.cbc.ca/news/politics/canada-to-accept-up-to-1-300-syrian-refugees-1.1353950"}]; 
 
 var data = getData();
-var story = [
-{name: 'Approximately 2,000,000 Syrians have fled the country because of the war. <span class="color">*</span> of these refugees are less than 4 years of age.', value: 372000},
-{name: '<span class="color">*</span> are 5 to 11 years old.', value: 394000},
-{name: '<span class="color">*</span> are teenagers.', value: 264000},
-{name: '<span class="color">*</span> adults have fled the country.', value: 912000},
-{name: 'And <span class="color">*</span> refugees are older than 60 years.', value: 58000}
-]
 
-// Draw header
-var url = "http://jplusplus.se/u/syria/index.html?country="+data['Country id'];
+// Headlines
+var story = [
+	{name: 'Approximately 2,000,000 Syrians have fled the country because of the war. <span class="color">*</span> of these refugees are less than 4 years of age.', value: 372000},
+	{name: '<span class="color">*</span> are 5 to 11 years old.', value: 394000},
+	{name: '<span class="color">*</span> are teenagers.', value: 264000},
+	{name: '<span class="color">*</span> adults have fled the country.', value: 912000},
+	{name: 'And <span class="color">*</span> refugees are older than 60 years.', value: 58000}
+];
+
+// Set country specific content
+var url = data['Country id'] == "fi" ? "http://jplusplus.se/u/syria/index.html" : "http://jplusplus.se/u/syria/index.html?country="+data['Country id']; // Exception to capture initial Finnish shares
 $('h1').html('A short story about how '+data["Country"]+' is helping <span class="color">2 million</span> Syrian refugees');
 $('title').text('A short story about how '+data["Country"]+' is helping 2 million Syrian refugees');
 $('.fb-like').attr('data-href', url);
 $('.twitter-share-button').attr('data-url', url);
 $('#source').text(data["Source name"]).attr('href', data["Source url"]);
+
 // Draw story
 for (var i=0; i<story.length; i++) {
 	var d = story[i];
 	var str = d.name.replace("*", addCommas(d.value))
+	// Add heading
 	cont.append('<h2 id="h'+i+'"><a href="javascript:scrollTo(\'h'+(i+1)+'\', '+(d.value/100)+')">'+str+' <br><div class="button">Tell me more</div></a></h2>');
+	// Draw icons
 	drawIcons(d.value);
 }
+// Add final national heading
 cont.append('<h2 id="h'+story.length+'">'+data["Sentence"].replace("*", "<span class=\"color\">"+data["Number"]+"</span>")+'<br>But hey, we can\'t help everyone.</h2><br>');
+// Draw icons
 drawIcons(data["Number"]);
+
+// Scroll to top
 cont.append('<br><br><br><br><br><div class="button"><a href="javascript:scrollTo(\'top\', 2000)">Back to top</a></div>');		
 
-
-//scrollToAnchor();
 </script>
 
 <script>
